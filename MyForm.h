@@ -33,7 +33,8 @@ namespace Laba6Client {
 			int serverPort = 8080;
 			IPEndPoint^ serverEndPoint = gcnew IPEndPoint(serverIP, serverPort);
 			clientSocket->Connect(serverEndPoint);
-			myMutex->WaitOne();
+			if(clientSocket->Connected)
+				myMutex->WaitOne();
 		}
 
 	protected:
@@ -85,10 +86,9 @@ namespace Laba6Client {
 			this->label1->AutoSize = true;
 			this->label1->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 14.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
-			this->label1->Location = System::Drawing::Point(16, 11);
-			this->label1->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->label1->Location = System::Drawing::Point(12, 9);
 			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(335, 29);
+			this->label1->Size = System::Drawing::Size(259, 24);
 			this->label1->TabIndex = 0;
 			this->label1->Text = L"Повар: Ты пришел за едой\?";
 			// 
@@ -97,19 +97,17 @@ namespace Laba6Client {
 			this->label2->AutoSize = true;
 			this->label2->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 14.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
-			this->label2->Location = System::Drawing::Point(16, 59);
-			this->label2->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->label2->Location = System::Drawing::Point(12, 48);
 			this->label2->Name = L"label2";
-			this->label2->Size = System::Drawing::Size(170, 29);
+			this->label2->Size = System::Drawing::Size(130, 24);
 			this->label2->TabIndex = 1;
 			this->label2->Text = L"Незнакомец: ";
 			// 
 			// textBox1
 			// 
-			this->textBox1->Location = System::Drawing::Point(185, 64);
-			this->textBox1->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->textBox1->Location = System::Drawing::Point(139, 52);
 			this->textBox1->Name = L"textBox1";
-			this->textBox1->Size = System::Drawing::Size(132, 22);
+			this->textBox1->Size = System::Drawing::Size(100, 20);
 			this->textBox1->TabIndex = 2;
 			// 
 			// povarAnswer
@@ -117,20 +115,18 @@ namespace Laba6Client {
 			this->povarAnswer->AutoSize = true;
 			this->povarAnswer->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 14.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(204)));
-			this->povarAnswer->Location = System::Drawing::Point(16, 108);
-			this->povarAnswer->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+			this->povarAnswer->Location = System::Drawing::Point(12, 88);
 			this->povarAnswer->Name = L"povarAnswer";
-			this->povarAnswer->Size = System::Drawing::Size(90, 29);
+			this->povarAnswer->Size = System::Drawing::Size(71, 24);
 			this->povarAnswer->TabIndex = 3;
 			this->povarAnswer->Text = L"Повар:";
 			this->povarAnswer->Visible = false;
 			// 
 			// exit
 			// 
-			this->exit->Location = System::Drawing::Point(21, 162);
-			this->exit->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->exit->Location = System::Drawing::Point(16, 132);
 			this->exit->Name = L"exit";
-			this->exit->Size = System::Drawing::Size(100, 28);
+			this->exit->Size = System::Drawing::Size(75, 23);
 			this->exit->TabIndex = 4;
 			this->exit->Text = L"Уйти";
 			this->exit->UseVisualStyleBackColor = true;
@@ -139,10 +135,9 @@ namespace Laba6Client {
 			// 
 			// say
 			// 
-			this->say->Location = System::Drawing::Point(21, 59);
-			this->say->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+			this->say->Location = System::Drawing::Point(16, 48);
 			this->say->Name = L"say";
-			this->say->Size = System::Drawing::Size(156, 28);
+			this->say->Size = System::Drawing::Size(117, 23);
 			this->say->TabIndex = 5;
 			this->say->Text = L"Сказать";
 			this->say->UseVisualStyleBackColor = true;
@@ -150,17 +145,16 @@ namespace Laba6Client {
 			// 
 			// MyForm
 			// 
-			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
+			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::SystemColors::WindowFrame;
-			this->ClientSize = System::Drawing::Size(464, 213);
+			this->ClientSize = System::Drawing::Size(348, 173);
 			this->Controls->Add(this->say);
 			this->Controls->Add(this->exit);
 			this->Controls->Add(this->povarAnswer);
 			this->Controls->Add(this->textBox1);
 			this->Controls->Add(this->label2);
 			this->Controls->Add(this->label1);
-			this->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
 			this->Name = L"MyForm";
 			this->Text = L"MyForm";
 			this->ResumeLayout(false);
@@ -173,25 +167,30 @@ namespace Laba6Client {
 	}
 
 	private: System::Void say_Click(System::Object^ sender, System::EventArgs^ e) {
-		try {
-			String^ message = this->textBox1->Text;
-			array<Byte>^ buffer = Encoding::UTF8->GetBytes(message);
-			clientSocket->Send(buffer);
-			array<Byte>^ bufferFood = gcnew array<Byte>(1024);
-			int bytesRead = clientSocket->Receive(bufferFood);
-			String^ answer = System::Text::Encoding::UTF8->GetString(bufferFood, 0, bytesRead);
+		if (this->textBox1->Text != "") {
+			try {
+				String^ message = this->textBox1->Text;
+				array<Byte>^ buffer = Encoding::UTF8->GetBytes(message);
+				clientSocket->Send(buffer);
+				array<Byte>^ bufferFood = gcnew array<Byte>(1024);
+				int bytesRead = clientSocket->Receive(bufferFood);
+				String^ answer = System::Text::Encoding::UTF8->GetString(bufferFood, 0, bytesRead);
 
-			this->say->Visible = false;
-			this->textBox1->Enabled = false;
-			this->povarAnswer->Text = answer;
-			this->povarAnswer->Visible = true;
-			this->exit->Visible = true;
-		}
-		catch (Exception^ e)
-		{
-			myMutex->ReleaseMutex();
-			myMutex->WaitOne();
-			Console::WriteLine("Ошибка: " + e->Message);
+				this->say->Visible = false;
+				this->textBox1->Enabled = false;
+				this->povarAnswer->Text = answer;
+				this->povarAnswer->Visible = true;
+				this->exit->Visible = true;
+			}
+			catch (Exception^ e)
+			{
+				myMutex->ReleaseMutex();
+				this->say->Visible = false;
+				this->textBox1->Enabled = false;
+				this->povarAnswer->Text = "Повар исчез...";
+				this->povarAnswer->Visible = true;
+				this->exit->Visible = true;
+			}
 		}
 	}
 };
